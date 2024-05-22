@@ -1,9 +1,27 @@
+import { Loading } from "@/components";
 import { Box, Container, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const EditProductPage = () => {
 
     const { id } = useParams();
+
+    const [product, setProduct] = useState<any | null>(null);
+
+    const loadInitData = async() => {
+
+    }   
+
+    useEffect(() => {
+        loadInitData().catch(console.log);
+    }, []);
+
+    if( product == null ){
+        return(
+            <Loading />
+        );
+    }
 
     return (
         <Container sx={{ py: '2rem' }}>

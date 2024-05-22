@@ -1,27 +1,43 @@
 import { StyledTableCell, StyledTableRow } from "@/components";
-import { getProducts } from "@/service/product.service";
-import { Box, Button, Container, MenuItem, Modal, Paper, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import * as productService from "@/service/product.service";
+import { Alert, Box, Button, CircularProgress, Container, MenuItem, Modal, Paper, Snackbar, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import Loading from "@/components/loading/loading.component";
 
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import { useNavigate } from "react-router-dom";
 
 
 const ProductPage = () => {
 
+    const navigate = useNavigate();
+
     const [products, setProducts] = useState<any[] | null>(null);
 
     const [openCreateModal, setOpenCreateModal] = useState<boolean>(false);
+    const [showCreatedAlert, setShowCreatedAlert] = useState<boolean>(false);
+
+    const handleCloseCreatedAlert = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        setShowCreatedAlert(false);
+    };
 
     const loadInitData = async () => {
-        const res = await getProducts();
+        const res = await productService.getProducts();
         setProducts(res);
     }
 
-    const createProduct = async(name: string, type: ProductType) => {
-        console.log("create product", name, type)
+    const createProduct = async (name: string, type: ProductType) => {
+        const newProductId = await productService.createProduct(name, type);
+        setShowCreatedAlert(true);
+        await new Promise( (resolve) => setTimeout(resolve, 3000));
+        navigate('/products/edit/' + newProductId);
+        //console.log("newProduct: ", newProductId);
     }
 
     useEffect(() => {
@@ -107,9 +123,20 @@ const ProductPage = () => {
                 aria-describedby="modal-modal-description"
             >
                 <div>
-                    <CreateProductModal handleCreate={createProduct}/>
+                    <CreateProductModal handleCreate={createProduct} />
                 </div>
             </Modal>
+
+            <Snackbar open={showCreatedAlert} autoHideDuration={6000} onClose={handleCloseCreatedAlert}>
+                <Alert
+                    onClose={handleCloseCreatedAlert}
+                    severity="success"
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    Producto creado!
+                </Alert>
+            </Snackbar>
         </Container>
     );
 }
@@ -137,9 +164,13 @@ const CreateProductModal = ({ handleCreate }: CreateProductModalProps) => {
     const [productName, setProductName] = useState("");
     const [productType, setProductType] = useState<ProductType>("TELEGRAM");
 
+    const [loadingCreation, setLoadingCreation] = useState<boolean>(false);
+
     const handleSubmit = () => {
         if (productName != "") {
+            setLoadingCreation(true);
             handleCreate(productName, productType);
+            setLoadingCreation(false);
         }
     }
 
@@ -194,7 +225,12 @@ const CreateProductModal = ({ handleCreate }: CreateProductModalProps) => {
             </div>
 
             <Button variant="contained" color="success" sx={{ minWidth: '100%', mt: 5 }} onClick={handleSubmit}>
-                Agregar
+                {
+                    !loadingCreation && <>Agregar </>
+                }
+                {
+                    loadingCreation && <CircularProgress />
+                }
             </Button>
         </Box>
     );

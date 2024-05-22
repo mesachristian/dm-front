@@ -21,13 +21,35 @@ const products = [
     { id: 'xY2zAbCd0E', name: 'Product 20', type: 'DISCORD' }
 ];
 
+function makeid(length: number) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
+}
+
 
 export const getProducts = async () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     return products;
 }
 
-export const createProduct = async() => {
+export const createProduct = async (name: string, type: ProductType) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    products.push({ id: 'xY2zAbCd0E', name: 'Product 20', type: 'DISCORD' });
+    const newId = makeid(10);
+    products.push({ id: newId, name: name, type: type });
+    return newId;
+}
+
+export const getProduct = async() => {
+    let query = products.filter( x => x.id );
+
+    if( query.length > 0 ){
+        return query[0];
+    }
 }
