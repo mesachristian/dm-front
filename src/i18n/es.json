@@ -1,4 +1,35 @@
 {
     "title": "Titulo Principal",
-    "logout" : "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "global": {
+        "userAlreadyExists": "El correo ya es usado por una cuenta",
+        "userNotFound": "El correo no esta registrado",
+        "Bad credentials" : "Contraseña incorrecta"
+    },
+    "login": {
+        "welcome": "¡Bienvenido!",
+        "needAccount": "¿No tienes cuenta?",
+        "createAccount": "Crea una.",
+        "email": "Correo",
+        "emailRequired": "Se requiere el correo",
+        "password": "Contraseña",
+        "passwordRequired": "Se requiere la contraseña",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "login": "Iniciar Sesión"
+    },
+    "signup": {
+        "welcome": "¡Crea tu cuenta!",
+        "hasAccount": "¿Ya tienes cuenta?",
+        "login": "Inicia sesión",
+        "name": "Nombre",
+        "nameRequired": "Se requiere el nombre",
+        "email": "Correo",
+        "emailRequired": "Se requiere el correo",
+        "password": "Contraseña",
+        "passwordRequired": "Se requiere la contraseña",
+        "confirmPassword": "Validar contraseña",
+        "confirmPasswordRequired": "Se requiere la contraseña",
+        "passwordsDontMatch": "Tus contraseñas no coinciden",
+        "signup": "Crear cuenta"
+    }
 }

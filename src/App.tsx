@@ -1,10 +1,15 @@
-import { Route, Routes } from "react-router-dom"
-import Scaffold from "./components/scaffold/scaffold.component"
+import { Route, Routes } from "react-router-dom";
 import { Suspense, lazy, useMemo, useState } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { ColorModeContext } from "./context/color-mode.context";
 import Loading from "./components/loading/loading.component";
+import AuthGuard from "./utilities/auth-guard";
 
+// PUBLIC
+const LoginPage = lazy(() => import('./pages/login/login.page' ));
+const SignUpPage = lazy(() => import('./pages/signup/signup.page'));
+
+// PRIVATE 
 const ProductPage = lazy(() => import('./pages/product/product.page'));
 const ClientsPage = lazy(() => import('./pages/clients/clients.page'));
 const BillingPage = lazy(() => import('./pages/billing/billing.page'));
@@ -41,7 +46,11 @@ function App() {
         <CssBaseline />
         <Suspense fallback={<Loading />}>
         <Routes>
-          <Route element={<Scaffold />}>
+
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+
+          <Route element={<AuthGuard />}>
             <Route path="/" element={<h1>home</h1>} />
             <Route path="/products">
               <Route path="" element={<ProductPage />} />

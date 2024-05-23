@@ -4,13 +4,15 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useContext, useState } from "react";
 import { ColorModeContext } from "@/context/color-mode.context";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // ICONS
 import HomeTwoToneIcon from '@mui/icons-material/HomeTwoTone';
 import ShoppingCartTwoToneIcon from '@mui/icons-material/ShoppingCartTwoTone';
 import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
 import PaidTwoToneIcon from '@mui/icons-material/PaidTwoTone';
+import { useDispatch } from "react-redux";
+import { setAuthData } from "@/redux/reducers/auth.reducer";
 
 const SIDEBAR_ITEMS = [
     { id: 'sid-1', label: 'Inicio', path: '/', icon: <HomeTwoToneIcon /> },
@@ -19,9 +21,14 @@ const SIDEBAR_ITEMS = [
     { id: 'sid-4', label: 'Facturación', path: '/billing', icon: <PaidTwoToneIcon /> },
 ];
 
-const Scaffold = () => {
+interface IScaffoldProps {
+    children: JSX.Element | JSX.Element[];
+}
 
-    const { t, i18n } = useTranslation();
+const Scaffold = ({ children }: IScaffoldProps) => {
+
+    const { t } = useTranslation();
+    const dispatch = useDispatch();
 
     const theme = useTheme();
     const colorMode = useContext(ColorModeContext);
@@ -33,6 +40,11 @@ const Scaffold = () => {
     const handleSidebarItemClick = (index: number, path: string) => {
         setSelectedIndex(index);
         navigate(path);
+    }
+
+    const handleLogout = () => {
+        dispatch(setAuthData({ email: '', accessToken: '' }));
+        navigate("/login");
     }
 
     return (
@@ -48,35 +60,35 @@ const Scaffold = () => {
                     borderRight: 1,
                     borderColor: 'divider'
                 }}>
-                
+
                 { /** SIDEBAR HEADER **/}
                 <Container sx={{ height: '80px' }}>
 
                 </Container>
 
                 <Container sx={{ marginTop: '1rem' }}>
-                {
-                    SIDEBAR_ITEMS.map((el, idx) => {
-                        return (
-                            <Box
-                                key={el.id}
-                                onClick={ () => handleSidebarItemClick(idx, el.path) }
-                                sx={{
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    padding: '8px 16px',
-                                    borderRadius: '6px',
-                                    color: idx == selectedIndex ? 'rgb(24, 119, 242)' : 'rgb(99, 115, 129)',
-                                    backgroundColor: idx == selectedIndex ? 'rgba(24, 119, 242, 0.16)' : 'inherit'
-                                }}>
-                                {el.icon}
-                                <Typography variant="body1" sx={{ ml: '15px'}}>
-                                    {el.label}
-                                </Typography>
-                            </Box>
-                        );
-                    })
-                }
+                    {
+                        SIDEBAR_ITEMS.map((el, idx) => {
+                            return (
+                                <Box
+                                    key={el.id}
+                                    onClick={() => handleSidebarItemClick(idx, el.path)}
+                                    sx={{
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        padding: '8px 16px',
+                                        borderRadius: '6px',
+                                        color: idx == selectedIndex ? 'rgb(24, 119, 242)' : 'rgb(99, 115, 129)',
+                                        backgroundColor: idx == selectedIndex ? 'rgba(24, 119, 242, 0.16)' : 'inherit'
+                                    }}>
+                                    {el.icon}
+                                    <Typography variant="body1" sx={{ ml: '15px' }}>
+                                        {el.label}
+                                    </Typography>
+                                </Box>
+                            );
+                        })
+                    }
                 </Container>
 
             </Box>
@@ -107,7 +119,7 @@ const Scaffold = () => {
                             <IconButton sx={{ ml: 1, mr: 2 }} onClick={colorMode.toggleColorMode} color="inherit">
                                 {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
                             </IconButton>
-                            <Button sx={{ height: '50%' }} variant="contained">{t('logout')}</Button>
+                            <Button onClick={handleLogout} sx={{ height: '50%' }} variant="contained">{t('logout')}</Button>
                         </Box>
                     </Container>
 
@@ -116,7 +128,7 @@ const Scaffold = () => {
 
                 { /** BODY **/}
                 <Box sx={{ paddingTop: '80px' }}>
-                    <Outlet />
+                    {children}
                 </Box>
 
             </Box>
