@@ -1,6 +1,6 @@
-import { StyledTableCell, StyledTableRow } from "@/components";
+import { ConfirmationDialog, StyledTableCell, StyledTableRow } from "@/components";
 import * as productService from "@/service/product.service";
-import { Alert, Box, Button, CircularProgress, Container, MenuItem, Modal, Paper, Snackbar, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CircularProgress, Container, MenuItem, Modal, Paper, Snackbar, Table, TableBody, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import Loading from "@/components/loading/loading.component";
 
@@ -8,37 +8,87 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useTranslation } from "react-i18next";
 
 
 const ProductPage = () => {
 
     const navigate = useNavigate();
 
+    const { t } = useTranslation();
+
+    const { accessToken } = useSelector((state: RootState) => state.auth.authData);
+
     const [products, setProducts] = useState<any[] | null>(null);
 
     const [openCreateModal, setOpenCreateModal] = useState<boolean>(false);
     const [showCreatedAlert, setShowCreatedAlert] = useState<boolean>(false);
+    const [showDeletedAlert, setShowDeletedAlert] = useState<boolean>(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+
+    const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
 
     const handleCloseCreatedAlert = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
-          return;
+            return;
         }
-    
+
         setShowCreatedAlert(false);
     };
 
+    const handleCloseDeletedAlert = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setShowDeletedAlert(false);
+    };
+
     const loadInitData = async () => {
-        const res = await productService.getProducts();
-        setProducts(res);
+        const { data, error } = await productService.getProducts(accessToken);
+
+        if (data) {
+            setProducts(data);
+        }
+
+        if (error) {
+            console.log(error);
+        }
     }
 
     const createProduct = async (name: string, type: ProductType) => {
-        const newProductId = await productService.createProduct(name, type);
+
+        const res = await productService.createProduct(accessToken, { name: name, type: type });
         setShowCreatedAlert(true);
-        await new Promise( (resolve) => setTimeout(resolve, 3000));
-        navigate('/products/edit/' + newProductId);
-        //console.log("newProduct: ", newProductId);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        navigate('/products/edit/' + res.data);
     }
+
+    const handleCloseDialog = async (newValue?: boolean) => {
+        setShowConfirmDialog(false);
+
+        if (newValue) {
+            if (deleteId) {
+                const { error } = await productService.deleteProduct(accessToken, deleteId);
+
+                if (error) {
+                    console.log(error);
+                } else {
+                    setShowDeletedAlert(true);
+                    setDeleteId(null);
+                    loadInitData();
+                }
+            }
+        }
+    };
+
+    const handleDeleteProduct = (productId: string) => {
+        setDeleteId(productId);
+        setShowConfirmDialog(true);
+    }
+
 
     useEffect(() => {
         loadInitData().catch(console.log);
@@ -54,17 +104,30 @@ const ProductPage = () => {
 
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h4" fontWeight={600}>
-                    Productos
+                    {t('products.title')}
                 </Typography>
 
                 <Button variant="contained" color="success" onClick={() => setOpenCreateModal(true)}>
-                    Agregar &nbsp; <AddOutlinedIcon fontSize="small" />
+                    {t('global.add')} &nbsp; <AddOutlinedIcon fontSize="small" />
                 </Button>
             </Box>
 
+            {
+                products.length == 0 &&
+                <Card sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    padding: '1rem',
+                    mt: 5
+                }}>
+                    <Typography>
+                        {t('products.noProducts')}
+                    </Typography>
+                </Card>
+            }
 
             {
-                products &&
+                products.length > 0 &&
                 <TableContainer component={Paper} sx={{ mt: 5 }}>
                     <Table sx={{ minWidth: 500 }} aria-label="customized table">
                         <TableHead>
@@ -84,18 +147,21 @@ const ProductPage = () => {
                                     <StyledTableCell align="right">
                                         <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                                             <Box
+                                                onClick={() => navigate(`/products/edit/${product.id}`)}
                                                 sx={{
                                                     p: 1,
                                                     borderRadius: '6px',
                                                     width: '36px',
                                                     height: '36px',
                                                     backgroundColor: 'primary.main',
-                                                    color: 'primary.contrastText'
+                                                    color: 'primary.contrastText',
+                                                    cursor: 'pointer'
                                                 }}>
                                                 <BorderColorOutlinedIcon fontSize="small" />
                                             </Box>
 
                                             <Box
+                                                onClick={() => handleDeleteProduct(product.id)}
                                                 sx={{
                                                     p: 1,
                                                     ml: 2,
@@ -103,7 +169,8 @@ const ProductPage = () => {
                                                     width: '36px',
                                                     height: '36px',
                                                     backgroundColor: 'error.light',
-                                                    color: 'primary.contrastText'
+                                                    color: 'primary.contrastText',
+                                                    cursor: 'pointer'
                                                 }}>
                                                 <DeleteOutlineRoundedIcon fontSize="small" />
                                             </Box>
@@ -127,16 +194,35 @@ const ProductPage = () => {
                 </div>
             </Modal>
 
-            <Snackbar open={showCreatedAlert} autoHideDuration={6000} onClose={handleCloseCreatedAlert}>
+            <Snackbar open={showCreatedAlert} autoHideDuration={3000} onClose={handleCloseCreatedAlert}>
                 <Alert
                     onClose={handleCloseCreatedAlert}
                     severity="success"
                     variant="filled"
                     sx={{ width: '100%' }}
                 >
-                    Producto creado!
+                    {t("products.productCreated")}
                 </Alert>
             </Snackbar>
+
+            <Snackbar open={showDeletedAlert} autoHideDuration={3000} onClose={handleCloseDeletedAlert}>
+                <Alert
+                    onClose={handleCloseDeletedAlert}
+                    severity="error"
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {t("products.productDeleted")}
+                </Alert>
+            </Snackbar>
+
+            <ConfirmationDialog
+                id="delete-confirm-diag"
+                keepMounted
+                content={t("products.eraseDialog")}
+                open={showConfirmDialog}
+                onClose={handleCloseDialog}
+            />
         </Container>
     );
 }
@@ -152,24 +238,31 @@ const PRODUCT_TYPES = [
         label: 'Discord',
         icon: <img width={24} height={24} style={{ borderRadius: '5px' }} src="https://img.whop.com/EvPz7dvsMMCE-UYlUlTbSzDHbhBR6bV3X32V0qw28oU/rs:fill:32:32/el:1/dpr:2/aHR0cHM6Ly9hc3NldHMud2hvcC5jb20vdXBsb2Fkcy8yMDI0LTAzLTIxL3VzZXJfNDI2NDhfNmUwMGEyMTQtYWI1Zi00ODFkLTg5MmQtMjAwOWIwOWJhNDljLndlYnA" />
         //icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" data-fui-icon="true"><path d="M19.6361 5.0228C18.1907 4.35756 16.6648 3.88561 15.0973 3.61902C14.8828 4.00447 14.6888 4.40105 14.5159 4.8071C12.8463 4.55418 11.1484 4.55418 9.47881 4.8071C9.30587 4.4011 9.1118 4.00452 8.8974 3.61902C7.32897 3.88786 5.80205 4.36093 4.35518 5.02628C1.48276 9.29851 0.70409 13.4646 1.09342 17.5716C2.77558 18.821 4.6584 19.7712 6.66003 20.3809C7.11074 19.7715 7.50956 19.1251 7.85226 18.4483C7.20135 18.2039 6.57311 17.9024 5.9748 17.5473C6.13227 17.4325 6.28627 17.3142 6.43508 17.1994C8.17601 18.0224 10.0761 18.4491 12 18.4491C13.9238 18.4491 15.8239 18.0224 17.5648 17.1994C17.7154 17.3229 17.8694 17.4412 18.0251 17.5473C17.4257 17.903 16.7963 18.2051 16.1442 18.4501C16.4865 19.1265 16.8853 19.7724 17.3364 20.3809C19.3398 19.7737 21.224 18.8239 22.9065 17.5734C23.3633 12.8106 22.1261 8.68273 19.6361 5.0228ZM8.34541 15.0459C7.26047 15.0459 6.36414 14.0561 6.36414 12.8384C6.36414 11.6208 7.22932 10.6223 8.34195 10.6223C9.45458 10.6223 10.344 11.6208 10.325 12.8384C10.3059 14.0561 9.45112 15.0459 8.34541 15.0459ZM15.6545 15.0459C14.5678 15.0459 13.675 14.0561 13.675 12.8384C13.675 11.6208 14.5401 10.6223 15.6545 10.6223C16.7689 10.6223 17.6514 11.6208 17.6323 12.8384C17.6133 14.0561 16.7602 15.0459 15.6545 15.0459Z" fill="currentColor"></path></svg>
+    },
+    {
+        value: 'COURSE',
+        label: 'Curso',
+        icon: <img width={24} height={24} style={{ borderRadius: '5px' }} src="https://img.whop.com/KiinW9oG-qrIYcLySvj7dgdcz2zkI_-47LR9OYInssc/rs:fill:32:32/el:1/dpr:2/aHR0cHM6Ly9hc3NldHMud2hvcC5jb20vdXBsb2Fkcy8yMDI0LTAzLTE1L3VzZXJfMjQxMjk2NF81MzBiNGJjZS03OThhLTQyMDktYjA4Ni00MjgzNDBlYTkzODMucG5n" />
     }
 ];
 
 interface CreateProductModalProps {
-    handleCreate: (name: string, type: ProductType) => void;
+    handleCreate: (name: string, type: ProductType) => Promise<void>;
 }
 
 const CreateProductModal = ({ handleCreate }: CreateProductModalProps) => {
+
+    const { t } = useTranslation();
 
     const [productName, setProductName] = useState("");
     const [productType, setProductType] = useState<ProductType>("TELEGRAM");
 
     const [loadingCreation, setLoadingCreation] = useState<boolean>(false);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (productName != "") {
             setLoadingCreation(true);
-            handleCreate(productName, productType);
+            await handleCreate(productName, productType);
             setLoadingCreation(false);
         }
     }
@@ -189,12 +282,12 @@ const CreateProductModal = ({ handleCreate }: CreateProductModalProps) => {
                 p: 4,
             }}>
             <Typography id="modal-modal-title" variant="h6" component="h2">
-                Crear Producto
+                {t('products.create')}
             </Typography>
 
             <TextField
                 required id="cre-pro-name"
-                label="Nombre"
+                label={t('products.name')}
                 variant="outlined"
                 sx={{ minWidth: '100%', mt: 5 }}
                 value={productName}
@@ -208,9 +301,9 @@ const CreateProductModal = ({ handleCreate }: CreateProductModalProps) => {
                     sx={{ mt: 3, minWidth: '100%', '& .MuiSelect-select': { display: 'flex' } }}
                     id="outlined-select-currency"
                     select
-                    label="Tipo de Producto"
+                    label={t('products.type')}
                     defaultValue="TELEGRAM"
-                    helperText="Seleccione el tipo de producto"
+                    helperText={t('products.typeHelp')}
                     value={productType}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                         setProductType(event.target.value as ProductType);
@@ -224,12 +317,12 @@ const CreateProductModal = ({ handleCreate }: CreateProductModalProps) => {
                 </TextField>
             </div>
 
-            <Button variant="contained" color="success" sx={{ minWidth: '100%', mt: 5 }} onClick={handleSubmit}>
+            <Button disabled={loadingCreation} variant="contained" color="success" sx={{ minWidth: '100%', mt: 5 }} onClick={handleSubmit}>
                 {
-                    !loadingCreation && <>Agregar </>
+                    !loadingCreation && <>{t('global.add')} </>
                 }
                 {
-                    loadingCreation && <CircularProgress />
+                    loadingCreation && <CircularProgress size={20} />
                 }
             </Button>
         </Box>

@@ -1,4 +1,4 @@
-import { Button, TextField, styled } from "@mui/material";
+import { Box, Button, Card, TextField, styled } from "@mui/material";
 
 export const StandardTextInput = styled(TextField)({
     '& label.Mui-focused': {
@@ -24,4 +24,23 @@ export const StandardButton = styled(Button)({
     '&:hover': {
         backgroundColor: 'rgb(69, 79, 91)',
     },
+});
+
+export const SpaceBetweenBox = styled(Box)({
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+});
+
+export const CustomCard = styled(Card)({
+    display: 'flex',
+    justifyContent: 'space-between',
+    border: '1px solid',
+    borderColor: 'divider',
+    padding: '1rem'
+});
+
+export const FlexBox = styled(Box)({
+    display: 'flex'
 });

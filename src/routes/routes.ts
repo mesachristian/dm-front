@@ -1,9 +1,14 @@
 export const ROUTES = {
     public: {
         login: "/login",
-        signup: "/signup"
+        signup: "/signup",
+        productBill: "/product-bill"
     },
     private: {
-        home: "/"
+        home: "/",
+        products: '/products',
+        clients: '/clients',
+        billing: '/billing',
+        addTelegram: "/add-telegram"
     }
 }

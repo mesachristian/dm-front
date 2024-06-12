@@ -1,5 +1,7 @@
 declare global {
-    type ProductType = 'TELEGRAM' | 'DISCORD';
+    type ColorModeType = 'light' | 'dark';
+    type ProductType = 'TELEGRAM' | 'DISCORD' | 'COURSE';
+    type PriceType = 'FREE' | 'ONE_TIME' | 'SUBSCRIPTION';
 }
 
 export { };

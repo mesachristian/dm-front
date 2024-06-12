@@ -1,9 +1,10 @@
 import { StandardButton, StandardTextInput } from "@/components/styled-components/global.component";
+import { ColorModeContext } from "@/context/color-mode.context";
 import { setAuthData } from "@/redux/reducers/auth.reducer";
 import { ROUTES } from "@/routes/routes";
 import * as authService from "@/service/auth.service";
 import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
@@ -19,6 +20,7 @@ const LoginPage = () => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const colorMode = useContext(ColorModeContext);
 
     const [loadingForm, setLoadingForm] = useState<boolean>(false);
     const [showErrorSnackbar, setShowErrorSnackbar] = useState<boolean>(false);
@@ -49,6 +51,9 @@ const LoginPage = () => {
         setLoadingForm(false);
     }
 
+    useEffect(() => {
+        colorMode.setColorMode("light");
+    });
 
     return (
         <Box sx={{ minHeight: '100vh', display: 'flex' }}>

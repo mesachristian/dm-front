@@ -1,10 +1,27 @@
 {
     "title": "Titulo Principal",
     "logout": "Cerrar Sesión",
+    "scaffold": {
+        "home": "Inicio",
+        "products": "Productos",
+        "clients": "Clientes",
+        "billing": "Facturación",
+        "telegram": "Telegram"
+    },
     "global": {
         "userAlreadyExists": "El correo ya es usado por una cuenta",
         "userNotFound": "El correo no esta registrado",
-        "Bad credentials" : "Contraseña incorrecta"
+        "Bad credentials": "Contraseña incorrecta",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "add": "Agregar",
+        "paymentType": "Tipo de pago",
+        "free": "Gratis",
+        "oneTimePayment": "Pago único",
+        "subscription": "Suscripción",
+        "name": "Nombre",
+        "value": "Valor",
+        "save": "Guardar"
     },
     "login": {
         "welcome": "¡Bienvenido!",
@@ -31,5 +48,34 @@
         "confirmPasswordRequired": "Se requiere la contraseña",
         "passwordsDontMatch": "Tus contraseñas no coinciden",
         "signup": "Crear cuenta"
+    },
+    "products": {
+        "title": "Productos",
+        "create": "Crear Producto",
+        "name": "Nombre del producto",
+        "type": "Tipo de producto",
+        "typeHelp": "Seleccione el tipo de producto",
+        "eraseDialog": "¿Desea borrar el producto?",
+        "productCreated": "¡Producto creado!",
+        "productDeleted": "¡Producto borrado!",
+        "editTitle": "Editar Producto",
+        "telegramTitle": "Canales de Telegram",
+        "addTelegramButton": "Agregar Canal/Grupo",
+        "noProducts" : "No tienes productos creados. ¡Crea uno!",
+        "modules": "Modulos",
+        "addModule": "Nuevo Modulo"
+    },
+    "telegram": {
+        "title": "Añade tu grupo o canal de Telegram",
+        "channel": "Canal",
+        "group": "Grupo",
+        "verify": "Verificar",
+        "step1": "Paso 1: agrega Whop Bot a tu Telegram",
+        "step1Group": "Para un grupo, agregue Whop Bot como administrador.",
+        "step1Channel": "Para un canal, agregue Whop Bot como administrador del canal.",
+        "step2": "Paso 2: Verificar",
+        "step2Text": "Pega el código en tu canal/grupo una vez que se le agregue el robot Whop.",
+        "waitingConfirmation": "Esperando confirmación...",
+        "copiedToClipboard": "Código copiado"
     }
 }

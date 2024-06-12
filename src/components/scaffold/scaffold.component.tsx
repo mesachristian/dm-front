@@ -2,24 +2,21 @@ import { Box, Button, Container, IconButton, Typography, useTheme } from "@mui/m
 import { useTranslation } from "react-i18next";
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ColorModeContext } from "@/context/color-mode.context";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setAuthData } from "@/redux/reducers/auth.reducer";
+import { ROUTES } from "@/routes/routes";
 
 // ICONS
 import HomeTwoToneIcon from '@mui/icons-material/HomeTwoTone';
 import ShoppingCartTwoToneIcon from '@mui/icons-material/ShoppingCartTwoTone';
 import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
 import PaidTwoToneIcon from '@mui/icons-material/PaidTwoTone';
-import { useDispatch } from "react-redux";
-import { setAuthData } from "@/redux/reducers/auth.reducer";
+import TelegramIcon from '@mui/icons-material/Telegram';
 
-const SIDEBAR_ITEMS = [
-    { id: 'sid-1', label: 'Inicio', path: '/', icon: <HomeTwoToneIcon /> },
-    { id: 'sid-2', label: 'Productos', path: '/products', icon: <ShoppingCartTwoToneIcon /> },
-    { id: 'sid-3', label: 'Clientes', path: '/clients', icon: <PersonOutlineTwoToneIcon /> },
-    { id: 'sid-4', label: 'Facturación', path: '/billing', icon: <PaidTwoToneIcon /> },
-];
+
 
 interface IScaffoldProps {
     children: JSX.Element | JSX.Element[];
@@ -28,6 +25,17 @@ interface IScaffoldProps {
 const Scaffold = ({ children }: IScaffoldProps) => {
 
     const { t } = useTranslation();
+
+    const location = useLocation();
+
+    const SIDEBAR_ITEMS = [
+        { id: 'sid-1', label: t('scaffold.home'), path: ROUTES.private.home, icon: <HomeTwoToneIcon /> },
+        { id: 'sid-2', label: t('scaffold.products'), path: ROUTES.private.products, icon: <ShoppingCartTwoToneIcon /> },
+        { id: 'sid-3', label: t('scaffold.clients'), path: ROUTES.private.clients, icon: <PersonOutlineTwoToneIcon /> },
+        { id: 'sid-4', label: t('scaffold.billing'), path: ROUTES.private.billing, icon: <PaidTwoToneIcon /> },
+        { id: 'sid-5', label: t('scaffold.telegram'), path: ROUTES.private.addTelegram, icon: <TelegramIcon /> },
+    ];
+
     const dispatch = useDispatch();
 
     const theme = useTheme();
@@ -46,6 +54,16 @@ const Scaffold = ({ children }: IScaffoldProps) => {
         dispatch(setAuthData({ email: '', accessToken: '' }));
         navigate("/login");
     }
+
+    useEffect(() => {
+        colorMode.setColorMode("dark");
+        
+        let indexes = SIDEBAR_ITEMS.map((item, index) => {
+            return { item, index };
+        }).filter(obj => location.pathname.startsWith(obj.item.path)).map(obj => obj.index);
+
+        setSelectedIndex(indexes[indexes.length - 1]);
+    }, []);
 
     return (
         <Box>
